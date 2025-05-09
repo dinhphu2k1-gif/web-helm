@@ -1,0 +1,71 @@
+poly:
+  apps:
+    web:
+      enabled: true
+      deployType: Deployment
+      replicas: 1
+
+      version: 1.0.0
+      appVersion: 1.0.0
+      
+      image:
+        repository: nginx
+        tag: latest
+        pullPolicy: IfNotPresent
+
+      pod: 
+        extraLabels:
+          app: mis
+          env: dev
+        volumes: 
+          - name: web-storage-pv
+            persistentVolumeClaim:
+              claimName: web-storage-pv
+      
+      container:
+        ports:
+          - name: http
+            containerPort: 80
+            protocol: TCP
+        resources:
+          limits:
+            cpu: 256m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi 
+        volumeMounts:
+          - name: web-storage-pv
+            mountPath: /usr/share/nginx/html
+        # probes:
+        #   disableProbes: ["startupProbe"]
+      
+      service:
+        enabled: true
+        type: NodePort
+        ports: 
+          - name: http
+            port: 80
+            targetPort: 80
+            protocol: TCP
+      
+      ingress: 
+        enabled: true
+        name: web-ingress
+        className: nginx
+        annotations:
+          kubernetes.io/ingress.class: nginx
+          nginx.ingress.kubernetes.io/rewrite-target: /
+
+        hosts:
+          - host: web.local
+            paths:
+              - path: /
+                pathType: Prefix     
+      
+      autoscaling:
+        enabled: false
+
+      pvcs: 
+        - name: web-storage-pv
+          create: true
