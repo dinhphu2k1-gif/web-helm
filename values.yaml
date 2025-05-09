@@ -58,7 +58,7 @@ poly:
           nginx.ingress.kubernetes.io/rewrite-target: /
 
         hosts:
-          - host: web.local
+          - host: web.example.com
             paths:
               - path: /
                 pathType: Prefix     
